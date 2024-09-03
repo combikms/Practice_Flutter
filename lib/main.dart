@@ -14,7 +14,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var name = ['김길산', '박등주', '차일두', '피자집'];
-  var like = [13, 7, 2, 54];
 
   @override
   Widget build(BuildContext context) {
@@ -23,32 +22,11 @@ class _MyAppState extends State<MyApp> {
           child: Text('+'),
           onPressed: (){
             showDialog(context: context, builder: (context) {
-              return Dialog(child:
-              Container(
-                padding: EdgeInsets.all(30),
-                width: 400,
-                height: 250,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text('Contact', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),),
-                    TextField(),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
-                      child: Row(                      
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(onPressed: (){}, child: Text('Cancel')),
-                          TextButton(onPressed: (){}, child: Text('OK')),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-
-              )
-              );
+              return DialogUI(name: name, addName: (inputName) {
+                setState(() {
+                  name = [...name, inputName];
+                });
+              },);
             });
           },
         ),
@@ -73,6 +51,46 @@ class _MyAppState extends State<MyApp> {
       );
   }
 }
+
+class DialogUI extends StatelessWidget {
+  DialogUI({super.key, this.name, this.addName});
+  var inputData = TextEditingController();
+  final name;
+  final addName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(child:
+    Container(
+      padding: EdgeInsets.all(30),
+      width: 400,
+      height: 250,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text('Contact', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),),
+          TextField(controller: inputData,),
+          Container(
+            margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(onPressed: (){ Navigator.pop(context); }, child: Text('Cancel')),
+                TextButton(onPressed: (){
+                    addName(inputData.text);
+                    Navigator.pop(context);
+                  }, child: Text('OK')),
+              ],
+            ),
+          )
+        ],
+      ),
+    )
+    );
+  }
+}
+
 
 class NavBar extends StatelessWidget {
   const NavBar({super.key});
