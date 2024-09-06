@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -13,7 +15,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var name = ['김길산', '박등주', '차일두', '피자집'];
+
+  getPermission() async {
+    var status = await Permission.contacts.status;
+    if (status.isGranted) {
+      print('Permitted');
+      var contacts = await ContactsService.getContacts();
+      setState(() {
+        name = contacts;
+      });
+
+    } else if (status.isDenied) {
+      print('Denied');
+      Permission.contacts.request();
+    }
+  }
+
+  var name = [];
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +40,12 @@ class _MyAppState extends State<MyApp> {
           child: Text('+'),
           onPressed: (){
             showDialog(context: context, builder: (context) {
-              return DialogUI(name: name, addName: (inputName) {
+              return DialogUI(name: name, addName: (inputName) async {
+                var newPerson = Contact();
+                newPerson.givenName = inputName;
+                await ContactsService.addContact(newPerson);
                 setState(() {
-                  name = [...name, inputName];
+                  name = [...name, newPerson];
                 });
               },);
             });
@@ -35,18 +56,20 @@ class _MyAppState extends State<MyApp> {
           titleTextStyle: TextStyle(
             fontSize: 20,
           ),
+          actions: [
+            IconButton(onPressed: (){
+              getPermission();
+            }, icon: Icon(Icons.contacts))
+          ],
         ),
         body: ListView.builder(
           itemCount: name.length,
             itemBuilder: (c, i) {
               return ListTile(
-                leading: Image.asset('dog.png'),
-                title: Text(name[i]),
+                leading: Image.asset('assets/dog.png'),
+                title: Text(name[i].givenName ?? '이름없음'),
               );
             }
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: NavBar(),
         ),
       );
   }
